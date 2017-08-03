@@ -1,0 +1,177 @@
+<!--_meta 作为公共模版分离出去-->
+<!DOCTYPE HTML>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="renderer" content="webkit|ie-comp|ie-stand">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+		<meta http-equiv="Cache-Control" content="no-siteapp" />
+		
+		<link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css"/>
+		<title></title>
+	    <style type="text/css">
+	        #plan-map {
+			    height: 300px;
+			    width: 100%;
+			    /*margin-left: 30px;*/
+			}
+			.button-group.map-button {
+			    position: absolute;
+			    top: 30px;
+			    right: 30px;
+			    bottom: initial;
+			}
+	    </style> 
+	</head>
+
+	<body>
+		<article class="page-container">													
+			<form class="form form-horizontal" id="form-article-add">
+				
+                <div class="row cl"  style="position: relative;padding: 0 15px;width: 900px;margin:0 auto;">
+                  <div class="col-xs-6 col-sm-6">
+	                    <label for="" class="col-sm-5 control-label text-right">区域设置:</label>							 
+                  </div>
+                        <div id="plan-map">
+								
+			
+                        </div>  
+						<div class="button-group map-button">
+						    <input type="button" class="button" value="绘制区域" id="startArea"/>
+						    <input type="button" class="button" value="开始编辑" id="stratEdit"/>
+						    <input type="button" class="button" value="完成编辑" id="endEdit"/>
+						</div>              
+                </div>	
+			</form>
+		</article>
+	    <script src="https://cdn.bootcss.com/jquery/2.2.1/jquery.js"></script>
+		<script type="text/javascript" src="http://webapi.amap.com/maps?v=1.3&amp;key=8e55c2308a73c9e5b5b9b5bff24277ae&plugin=AMap.MouseTool,AMap.Scale,AMap.OverView,AMap.ToolBar,AMap.Autocomplete,AMap.Geocoder,AMap.Riding"></script>	
+		<script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
+
+		<script type="text/javascript">
+			
+		
+				var map = new AMap.Map("plan-map", {
+					resizeEnable: true,
+					center: [117.128122, 39.086549],
+					zoom: 15
+				});
+				//添加功能条
+				var scale = new AMap.Scale({
+						visible: true
+					}),
+					toolBar = new AMap.ToolBar({
+						visible: true
+					}),
+					overView = new AMap.OverView({
+						visible: true
+					});
+				map.addControl(scale);
+				map.addControl(toolBar);
+				map.addControl(overView);
+		
+				/*  加载完成执行事件   */
+				AMap.event.addListener(map, 'complete', event);
+		
+				function event() {
+					new AMap.Marker({
+						map: map,
+						position: [117.128122, 39.086549],
+						//				icon: new AMap.Icon({
+						////					image: 'img/positionPoint.png',
+						////					size: new AMap.Size(42,70), //图标大小
+						////					imageSize: new AMap.Size(21,35)
+						//				}),			    
+					})
+				}
+		
+				var PolygonData = ''; //手动绘多边形完成的数组	
+				//手动绘多边形	
+				var mouseTool = '';
+		        var onece = true;
+				function drawPolygon() {
+					//默认清空一次
+					mouseTool != '' ? mouseTool.close(true) : mouseTool;
+					mouseTool = new AMap.MouseTool(map);
+					mouseTool.polygon({
+						trokeWeight: 5,
+						strokeStyle: 'dashed'
+					});
+		
+					//手动绘多边形结束的事件
+					AMap.event.addListener(mouseTool, 'draw', function(e) {				
+						//第一次绘制的时候取的经纬度数组
+						if ( onece ){					
+							PolygonData = e.obj.G.path
+							onece = false;	
+						    return	
+						}
+						//进行第二次绘制形状的时候删除该图像
+						e.obj.setMap(null)	
+					});
+				}
+		
+				var polylineEditor = ''; //定义多边形编辑对象
+				//编辑多边形   
+				function editPolygon(dataArr) {
+					mouseTool.close(true)
+					var arr = new Array(); //经纬度坐标数组 
+		
+					//  arr.push(new AMap.LngLat("117.13026524","39.08720286")); 
+					//  arr.push(new AMap.LngLat("117.1312952","39.08731945")); 
+					//  arr.push(new AMap.LngLat("117.13138103","39.08723617")); 
+					//  arr.push(new AMap.LngLat("117.12814093","39.08830209")); 
+					//定义多边形对象
+					if( polylineEditor == '' ) {
+						polyline = new AMap.Polygon({
+							path: dataArr, //设置多边形的节点数组
+							strokeColor: "#F00",
+							strokeOpacity: 0.4,
+							strokeWeight: 3,
+							strokeStyle: "dashed",
+							strokeDasharray: [10, 5],
+							zIndex: 20
+						});
+			
+						polyline.setMap(map); //地图上添加多边形    
+					}
+					
+		
+					//构造多边形编辑对象，并开启多边形的编辑状态
+					map.plugin(["AMap.PolyEditor"], function() {
+						polylineEditor == ''? polylineEditor = new AMap.PolyEditor(map, polyline): polylineEditor; 
+						polylineEditor.open();
+						AMap.event.addListener(polylineEditor, 'end', function(e) {
+							//编辑完成的数组
+							console.log(e, JSON.stringify(e.target.G.path))
+							
+						});
+					});
+				}
+		
+				//绘制区域bth
+				$('#startArea').on('click', function() {
+					drawPolygon()
+				});
+		
+				//开始编辑
+				$('#stratEdit').on('click', function() {
+					if(PolygonData != '') {
+						editPolygon(PolygonData)
+					}
+				});
+		
+				//完成编辑
+				$('#endEdit').on('click', function() {
+					if(polylineEditor != '') {
+						polylineEditor.close();
+					}
+		
+				});
+			
+		</script>	
+	</body>
+    
+</html>

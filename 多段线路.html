@@ -1,0 +1,145 @@
+<!--_meta 作为公共模版分离出去-->
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="renderer" content="webkit|ie-comp|ie-stand">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+		<meta http-equiv="Cache-Control" content="no-siteapp" />	
+		<title></title>
+	    <!--  地图    -->
+		<script type="text/javascript" src="http://webapi.amap.com/maps?v=1.3&amp;key=8e55c2308a73c9e5b5b9b5bff24277ae&plugin=AMap.MouseTool,AMap.Scale,AMap.OverView,AMap.ToolBar,AMap.Riding"></script>	
+		<script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
+
+	    <style type="text/css">
+	        #map{
+				width: 94%;
+				margin: 0 auto;
+				height: 290px;
+				margin-top: 34px;
+			}
+			form.fixed{
+				position: fixed;
+				width: 80%;
+				height: 50%;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				margin: auto;
+				background: #FFF;
+				border: 1px solid #CCCCCC;
+				border-radius: 5px;
+				padding-bottom: 10px;
+				z-index: 1000;
+			}
+			form.fixed h4{
+			    font-size: 16px;
+			    text-align: center;
+			    border-bottom: 1px solid #CCCCCC;
+			}
+			
+			form.fixed ul{
+			    padding: 5px 15px; 
+			}
+			
+			form.fixed ul li{
+			    border-bottom: 1px solid #CCC;
+			    overflow: auto;
+			    padding: 8px 8px;
+			}
+			
+			form.fixed ul li input,form.fixed ul li label{
+			   float: left;
+			}
+			form.fixed ul li input{
+				margin-top: 5px;
+				margin-right: 5px;
+			}
+	    </style> 
+	</head>
+
+	<body>
+		<article class="page-container">
+			<form class="form form-horizontal" id="form-article-add">				
+				<div class="row cl">	 
+                         <div class="col-sm-12 form-group des">
+	                         <label for="" class="col-sm-10 control-label" style="margin-left: 30px;">巡检地图:</label>
+	                         <div id="map"></div>	
+	                         <div id="panel" style="height: 0;overflow: hidden;"></div>
+                         </div>
+                </div> 
+			</form>
+		</article>		
+	<script type="text/javascript">
+			//初始化地图对象，加载地图
+			var map = new AMap.Map("map", {
+				resizeEnable: true,
+				center: [117.128122, 39.086549],
+				zoom: 15
+			});
+			//添加功能条
+			var scale = new AMap.Scale({
+					visible: true
+				}),
+				toolBar = new AMap.ToolBar({
+					visible: true
+				}),
+				overView = new AMap.OverView({
+					visible: true
+				});
+			map.addControl(scale);
+			map.addControl(toolBar);
+			map.addControl(overView);
+	
+			/*  加载完成执行事件   */
+			AMap.event.addListener(map, 'complete', event);
+	
+			function event() {
+				new AMap.Marker({
+					map: map,
+					position: [117.128122, 39.086549],
+					//				icon: new AMap.Icon({
+					////					image: 'img/positionPoint.png',
+					////					size: new AMap.Size(42,70), //图标大小
+					////					imageSize: new AMap.Size(21,35)
+					//				}),			    
+				})				
+			}
+			
+			
+		    function draw(data){
+		    	//骑行导航
+			    var riding = new AMap.Riding({
+			        map: map
+	//		        hideMarkers:true //隐藏图标
+			    }); 
+			    //根据起终点坐标规划骑行路线
+			    riding.search(data.start,data.end);	
+		    }
+		    
+		    var data = [
+		        { 
+		    	  start:[117.1287632,39.0871862],
+		          end:[117.13502884,39.0881522]
+		        },
+		        { 
+		    	  start:[117.13502884,39.0881522],
+		          end:[117.1386182467,39.0841637861]
+		         }
+		    ];
+		    
+		    for( var i=0; i<data.length; i++ ){
+		    	draw(data[i])
+		    }
+	        
+	//      map.setFitView(); 
+	//		map.setZoomAndCenter('zoomLevel':15,'center':[117.13502884,39.0881522])
+	
+	</script>	
+		<!--/请在上方写此页面业务相关的脚本-->
+		
+	</body>
+    
+</html>

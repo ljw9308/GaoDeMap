@@ -1,0 +1,219 @@
+<!--_meta 作为公共模版分离出去-->
+<!DOCTYPE HTML>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="renderer" content="webkit|ie-comp|ie-stand">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+		<meta http-equiv="Cache-Control" content="no-siteapp" />
+	
+		
+		
+		<!--/meta 作为公共模版分离出去-->
+
+		<title></title>
+		<style type="text/css">
+	        #station-map {
+			    height: 300px;
+			    margin: 10px 30px;
+			    /*width: 713px;*/
+			}
+			.amap-sug-result {
+			    position: fixed;
+			    z-index: 1024;
+			    background-color: #fefefe;
+			    border: 1px solid #d1d1d1;
+			}
+	    </style> 
+	   
+	</head>
+
+	<body>
+		<article class="page-container" style="width: 900px;width: 0 auto;position: relative;">
+			<form class="form form-horizontal" id="form-article-add">
+				
+				<div class="row cl">
+					<div class="col-xs-12 col-sm-12">
+						<label class="form-label col-xs-2 col-sm-2">站点位置：</label>
+						<div class="formControls col-xs-9 col-sm-9">
+							<input type="text" class="input-text" id="station-input" class="col-sm-9 form-control" style="width: 100%;" placeholder="请输入站点位置"/>
+                            <div class="amap-sug-result" id="input-list" style="visibility: visible;width: 100%; display: block;position: absolute;"></div>
+						</div>
+					</div>
+					<div id="station-map">
+								
+				    </div>
+				</div>
+
+			</form>
+		</article>
+		<script src="https://cdn.bootcss.com/jquery/2.2.1/jquery.js"></script>
+		<script type="text/javascript" src="http://webapi.amap.com/maps?v=1.3&amp;key=8e55c2308a73c9e5b5b9b5bff24277ae&plugin=AMap.MouseTool,AMap.Scale,AMap.OverView,AMap.ToolBar,AMap.Autocomplete,AMap.Geocoder,AMap.Riding"></script>	
+		<script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
+		<!-- 地图   -->
+		<script type="text/javascript">
+			var map = new AMap.Map("station-map", {
+				resizeEnable: true,
+				center: [117.128122, 39.086549],
+				zoom: 15
+			});
+			
+			//添加功能条
+		    var scale = new AMap.Scale({
+				visible: true
+			}),
+			toolBar = new AMap.ToolBar({
+				visible: true
+			}),
+			overView = new AMap.OverView({
+				visible: true
+			});
+		    map.addControl(scale);
+			map.addControl(toolBar);
+			map.addControl(overView);
+				
+			/*  加载完成执行事件   */
+			AMap.event.addListener(map, 'complete', event);
+			
+			function event(){
+				new AMap.Marker({
+						map: map,
+						position: [117.128122, 39.086549],
+		//				icon: new AMap.Icon({
+		////					image: 'img/positionPoint.png',
+		////					size: new AMap.Size(42,70), //图标大小
+		////					imageSize: new AMap.Size(21,35)
+		//				}),
+					    
+				    })
+				 //输入提示
+				 var auto = new AMap.Autocomplete({
+				     input: "station-input"
+				 });
+				 
+				 $('#station-input').on('keyup',function(e){
+				 	 var keyword = $(this).val();
+				 	 $('#input-list').empty().show();
+				     auto.search(keyword,function(status,result){		 	
+				 	 	if( status =='complete' ){
+				 	 		$('#input-list').empty()
+				 	 		console.log()
+				 	 		var html='';		 	 		
+				 	 		for( var i=0; i<result.tips.length; i++ ){		 	 			
+				 	 	      	html +="<div class=\"auto-item\" id=\"amap-sug"+i+"\" data-lng="+result.tips[i].location.lng+" data-lat="+result.tips[i].location.lat+"><span class=\"city\">"+result.tips[i].name+"</span>";
+				 	 			html +="<span class=\"auto-item-span\">"+result.tips[i].district+"</span></div>"
+				 	 		}
+		                    $('#input-list').append(html) 
+				 	 	}		 	
+				 	 }) 
+				 	//回车事件 
+				 	if(e && e.keyCode==13){ 
+				 		var value = $('#station-input').val()
+		                getlocation(value)
+		            } 
+				 })
+				
+				 $('#station-input').on('blur',function(){
+		//		 	$('#input-list').hide();
+				 	
+				 })
+				 
+				//输入提示选择列表
+				$('#input-list').on('click','.auto-item',function(){
+					var lng = $(this).attr('data-lng');
+					var lat = $(this).attr('data-lat');
+				    
+				    var value = $(this).find('span.city').text();
+					$('#station-input').val(value)
+					//用经纬度定位
+					if ( lng != 'undefined' ){			
+						setPoint([lng,lat])				
+					}else{							
+						getlocation(value)
+					}
+					$('#input-list').hide();
+				})
+					
+			}
+			
+			/*  画点   */
+			var mark = '';
+			function setPoint(lnglatXY){
+				mark !=''?mark.setMap(null):mark;
+			
+				mark = new AMap.Marker({
+						map: map,
+						position: lnglatXY,
+		//				icon: new AMap.Icon({}),	    
+				    })
+		
+				map.panTo(lnglatXY);
+			}
+			
+			AMap.service('AMap.Geocoder',function(){//回调函数
+			    //实例化Geocoder
+			    var geocoder = new AMap.Geocoder({
+			        city: "010"//城市，默认：“全国”
+			    });
+			    //TODO: 使用geocoder 对象完成相关功能
+			
+			
+			//逆地理编码	    
+			    map.on('click',function(e){	    	
+			    	var lat = e.lnglat.lat;
+			    	var lng = e.lnglat.lng;
+			    	var lnglatXY=[lng, lat];//地图上所标点的坐标
+			    	getAdd(lnglatXY)	
+			    	
+			    	/* 画点 */
+			    	setPoint(lnglatXY)
+			    })
+			    function getAdd(lnglatXY){
+			    	geocoder.getAddress(lnglatXY, function(status, result) {
+					    if (status === 'complete' && result.info === 'OK') {
+					       //获得了有效的地址信息:
+					       $('#station-input').val(result.regeocode.formattedAddress)
+					       
+					    }else{
+					       //获取地址失败
+					    }
+					});
+			    }
+				
+				
+			//正地理编码
+			getlocation = function(text){
+		
+				geocoder.getLocation(text, function(status, result) {	
+					alert(status)
+				    if (status === 'complete' && result.info === 'OK') {
+				        //TODO:获得了有效经纬度，可以做一些展示工作
+				        //比如在获得的经纬度上打上一个Marker
+				        var lat = result.geocodes[0].location.lat;
+				        var lng = result.geocodes[0].location.lng;
+				        setPoint([lng,lat])
+				        console.log(result.geocodes[0].location)
+				        new AMap.Marker({
+							map: map,
+							position: [lng, lat],
+			//				icon: new AMap.Icon({ 
+			//				}), 
+					    })
+				        
+				    }else{
+				        //获取经纬度失败
+				    }
+				});
+			}
+			
+		
+			})
+		</script>
+
+		<!--/请在上方写此页面业务相关的脚本-->
+		
+	</body>
+    
+</html>
