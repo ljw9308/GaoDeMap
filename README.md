@@ -11,3 +11,5 @@
     
     通过点击地图实现input框中的内容的变化
 ![](https://github.com/mysucceed/GaoDeMap/blob/master/img/keyword.png)
+## 通过调用高德地图的定位插件实现定位功能
+![](https://github.com/mysucceed/GaoDeMap/blob/master/img/position.png)
