@@ -6,7 +6,7 @@
     通过地图的骑行线路的功能实现多段线路组合在一起的效果，如：巡检线路的规划
 ![](https://github.com/mysucceed/GaoDeMap/blob/master/img/qixing.png)
 ## 使用地图的关键字的搜索功能
-    使用地图的关键字的搜索功能，注：高德地图有input的关键字搜索的组件功能，这里是通过调用地图搜索的api和结合jQuery来实现的。 
+    使用地图的关键字的搜索功能，注：高德地图有input的关键字搜索的组件功能。 
 ![](https://github.com/mysucceed/GaoDeMap/blob/master/img/key.png)
     
     通过点击地图实现input框中的内容的变化
